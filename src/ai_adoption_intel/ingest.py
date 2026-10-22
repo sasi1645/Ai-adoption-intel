@@ -6,10 +6,10 @@ RAW_DIR = Path("data/raw")
 PROCESSED_DIR = Path("data/processed")
 
 def find_file(level:str) -> Path:
-    matches = sorted(RAW_DIR.glob(f"*{level}.xlsx"))
-    if not matches:
-        raise FileNotFoundError(f"No file found for level '{level}' in {RAW_DIR}")
-    return matches[-1]
+   matches = sorted(RAW_DIR.glob(f"*{level}.xlsx"))
+   if not matches:
+       raise FileNotFoundError(f"No file found for level '{level}' in {RAW_DIR}")
+   return matches[-1]
 
 def drop_footnotes(df: pd.DataFrame, key_col:str) -> pd.DataFrame:
     key =pd.to_numeric(df[key_col], errors = "coerce")
@@ -23,7 +23,7 @@ def to_long(df: pd.DataFrame) -> pd.DataFrame:
 def clean_values(new_df:pd.DataFrame) -> pd.DataFrame:
     new_df = new_df.copy()
     new_df["status"] = "ok"
-    new_df.loc[new_df["value"]=="S","status"] = "suppressed"
+    new_df.loc[new_df["value"] =="S","status"] = "suppressed"
     new_df.loc[new_df["value"]==".","status"] = "not_collected"
     new_df["percentage"] = pd.to_numeric(
         new_df["value"].astype(str).str.rstrip("%"), errors = "coerce"
