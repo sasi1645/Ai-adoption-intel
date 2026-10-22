@@ -18,11 +18,12 @@ def read_processed(name:str) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(f"{path} does not exist. Please run the data processing script first.")
     df = pd.read_csv(path,parse_dates=["period_start","period_end"])
-    df = df.rename(columns = {"Question ID":"question_id", 
-              "Question":"question",
-              "Answer ID":"answer_id",
-              "Answer":"answer"}
-              )
+    df = df.rename(columns = {"Sector":"sector",
+                              "Question ID":"question_id", 
+                              "Question":"question",
+                              "Answer ID":"answer_id",
+                              "Answer":"answer"}
+                              )
     return df
 
 def load_table(df: pd.DataFrame, table: str,engine) -> None:
@@ -32,10 +33,11 @@ def load_table(df: pd.DataFrame, table: str,engine) -> None:
 
 def main()-> None:
     engine = get_engine()
-    table = "national"
-    df = read_processed(table)
-    load_table(df,table,engine)
-    print(f"Loaded the {len(df)} rows into {table}")
+    tables = ["national","sector"]
+    for table in tables:
+        df = read_processed(table)
+        load_table(df,table,engine)
+        print(f"Loaded the {len(df)} rows into {table}")
 
 if __name__ == "__main__":
     main()
