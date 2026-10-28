@@ -33,3 +33,15 @@ def sector_ai_adoption(sector:str):
         raise HTTPException(status_code = 404, detail = f"No AI adoption data was forund for number {sector} sector")
     records = df.to_dict(orient = "records")
     return records
+
+
+@app.get("/sectors/ranking")
+def sector_ranking(limit : int = 5):
+    query =text(""" SELECT sector,percentage
+    FROM sector
+    WHERE question_id = 7 AND answer = 'Yes' AND status = 'ok' AND period_start = (SELECT MAX(period_start) FROM sector)
+    ORDER BY percentage DESC
+     LIMIT :limit; """)
+    df = pd.read_sql_query(query,con = engine,params={"limit":limit})
+    records = df.to_dict(orient = "records")
+    return records
