@@ -30,7 +30,7 @@ def sector_ai_adoption(sector:str):
     ORDER BY period_start; """)
     df = pd.read_sql_query(query,con = engine,params={"sector":sector})
     if df.empty:
-        raise HTTPException(status_code = 404, detail = f"No AI adoption data was forund for number {sector} sector")
+        raise HTTPException(status_code = 404, detail = f"No AI adoption data was found for number {sector} sector")
     records = df.to_dict(orient = "records")
     return records
 
