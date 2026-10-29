@@ -44,7 +44,11 @@ def test_sector_ranking():
     assert response.status_code == 200
 
     data = response.json()
-    assert data[2] == {"sector": "52", "percentage": 40.1}
+    assert data[2] == {
+        "sector": "52",
+        "name": "Finance and Insurance",
+        "percentage": 40.1,
+    }
 
 
 def test_sector_ranking_abc():
@@ -61,7 +65,11 @@ def test_sector_ranking_100():
 
     data = response.json()
     assert len(data) == 20
-    assert data[5] == {"sector": "53", "percentage": 30.8}
+    assert data[5] == {
+        "sector": "53",
+        "name": "Real Estate and Rental and Leasing",
+        "percentage": 30.8,
+    }
 
 
 def test_ranking_default():
@@ -70,4 +78,8 @@ def test_ranking_default():
 
     data = response.json()
     assert len(data) == 5
-    assert data[4] == {"sector": "XX", "percentage": 33.7}
+    assert data[4] == {
+        "sector": "XX",
+        "name": "Multi-sector or multi-state companies",
+        "percentage": 33.7,
+    }

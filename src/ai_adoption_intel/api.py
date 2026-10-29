@@ -42,8 +42,9 @@ def sector_ai_adoption(sector: str):
 
 @app.get("/sectors/ranking")
 def sector_ranking(limit: int = 5):
-    query = text(""" SELECT sector,percentage
+    query = text(""" SELECT sector.sector,sector_names.name,percentage
     FROM sector
+    JOIN sector_names ON sector.sector = sector_names.sector
     WHERE question_id = 7 AND answer = 'Yes' AND status = 'ok' AND period_start = (SELECT MAX(period_start) FROM sector)
     ORDER BY percentage DESC
      LIMIT :limit; """)
