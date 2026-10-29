@@ -104,6 +104,22 @@ Ai-adoption-intel/
 - **Sector codes** follow two-digit NAICS sectors. The code `XX` refers to multi-unit companies that operate in multiple sectors or multiple states.
 - **Gap in the data:** no data was collected for the cycles covering October 6 to November 16, 2025, due to the federal funding lapse.
 
+## API
+A REST API, built with **FastAPI**, that serves the cleaned AI-adoption data from PostgreSQL as JSON.
+- **Run it:** (from the project root, with PostgreSQL running)
+
+uv run fastapi dev src/ai_adoption_intel/api.py
+- **Interactive Docs:** http://127.0.0.1:8000/docs
+
+| End Point | Parameters | Returns |
+|---|---|---|
+| `Get(/health)` | - |`{"status":"ok"}` |
+| `Get(/national/ai-adoption)` | - | Share of U.S. businesses using AI, one record per survey period: `[{"period_start",percentage},...]` |
+| `Get(/sectors/ai-adoption)` | `sector` (text,required), e.g. `?sector=44` | same trend one industry sector |
+| `Get(/sectors/ranking)` | `limit` (integer,default=5), e.g. `limit=3` | The top sectors AI in use in last period: `[{"sector",percentage},...]` |
+
+**Errors:** `404` if a sector has no data (e.g. `?sector=99`); `422` if a required parameter is missing or has the wrong type (e.g. `?limit=abc`).
+
 ## Next steps
 
 - [x] **Stage 1:** data pipeline, tests and PostgreSQL database
