@@ -116,7 +116,7 @@ uv run fastapi dev src/ai_adoption_intel/api.py
 | `Get(/health)` | - |`{"status":"ok"}` |
 | `Get(/national/ai-adoption)` | - | Share of U.S. businesses using AI, one record per survey period: `[{"period_start",percentage},...]` |
 | `Get(/sectors/ai-adoption)` | `sector` (text,required), e.g. `?sector=44` | same trend one industry sector |
-| `Get(/sectors/ranking)` | `limit` (integer,default=5), e.g. `limit=3` | The top sectors AI in use in last period: `[{"sector",percentage},...]` |
+| `Get(/sectors/ranking)` | `limit` (integer,default=5), e.g. `limit=3` | The top sectors AI in use in last period: `[{"sector","name",percentage},...]` |
 
 **Errors:** `404` if a sector has no data (e.g. `?sector=99`); `422` if a required parameter is missing or has the wrong type (e.g. `?limit=abc`).
 
