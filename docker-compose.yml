@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ai_adoption_intel                   
+    ports:
+      - "5433:5432"                       
+    volumes:
+      - db_data:/var/lib/postgresql
+      - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/01_create_tables.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_adoption_intel"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: .                          
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:${POSTGRES_PASSWORD}@db:5432/ai_adoption_intel  
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
