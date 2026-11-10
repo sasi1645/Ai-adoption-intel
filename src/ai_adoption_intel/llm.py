@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 load_dotenv()
 MODEL = "gpt-5.4-mini"
+forbidden = ['delete','drop','truncate','update','alter','insert','create','grant','revoke']
 SCHEMA_PROMT = """You write PostgreSQL queries for the ai_adoption_intel database.
 Return only the SQL query: no explanation, no markdown.
 Only write SELECT queries.
@@ -47,3 +48,15 @@ def generate_sql(question: str):
         input = question
     )
     return response.output_text
+
+def is_safe_sql(sql:str) -> bool:
+    sql = sql.lower().strip()
+    if not sql.startswith(("select","with")):
+        return False
+    sql = sql.rstrip(";")
+    if ";" in sql:
+        return False
+    for word in forbidden:
+        if word in sql:
+            return False
+    return True
