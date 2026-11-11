@@ -1,8 +1,22 @@
+import pandas as pd
 from dotenv import load_dotenv
 from openai import OpenAI
+
+from ai_adoption_intel.load import get_engine
+
 load_dotenv()
 MODEL = "gpt-5.4-mini"
-forbidden = ['delete','drop','truncate','update','alter','insert','create','grant','revoke']
+forbidden = [
+    "delete",
+    "drop",
+    "truncate",
+    "update",
+    "alter",
+    "insert",
+    "create",
+    "grant",
+    "revoke",
+]
 SCHEMA_PROMT = """You write PostgreSQL queries for the ai_adoption_intel database.
 Return only the SQL query: no explanation, no markdown.
 Only write SELECT queries.
@@ -29,6 +43,7 @@ Rules:
 - Always filter status = 'ok' (other values: 'suppressed', 'not_collected').
 - The latest period is period_start = (SELECT MAX(period_start) FROM <table>).
 - Sector 'XX' means multi-sector or multi-state companies.
+- For questions about industries, exclude sector "XX". If a behavior matters,write it down.
 
 Example:
 Question: Which sectors had the highest AI use in the latest period?
@@ -41,17 +56,19 @@ WHERE question_id = 7 AND answer = 'Yes' AND status = 'ok'
 ORDER BY percentage DESC
 LIMIT 5;"""
 client = OpenAI()
+readonly_engine = get_engine("READONLY_DATABASE_URL")
+
+
 def generate_sql(question: str):
     response = client.responses.create(
-        model = MODEL,
-        instructions = SCHEMA_PROMT,
-        input = question
+        model=MODEL, instructions=SCHEMA_PROMT, input=question
     )
     return response.output_text
 
-def is_safe_sql(sql:str) -> bool:
+
+def is_safe_sql(sql: str) -> bool:
     sql = sql.lower().strip()
-    if not sql.startswith(("select","with")):
+    if not sql.startswith(("select", "with")):
         return False
     sql = sql.rstrip(";")
     if ";" in sql:
@@ -60,3 +77,12 @@ def is_safe_sql(sql:str) -> bool:
         if word in sql:
             return False
     return True
+
+
+def ask(question: str) -> dict:
+    sql = generate_sql(question)
+    if not is_safe_sql(sql):
+        raise ValueError("The query is not safe for the database.")
+    df = pd.read_sql_query(sql, con=readonly_engine)
+    records = df.to_dict(orient="records")
+    return {"sql": sql, "rows": records}

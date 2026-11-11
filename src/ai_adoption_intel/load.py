@@ -8,12 +8,13 @@ from sqlalchemy import create_engine, text
 PROCESSED_DIR = Path("data/processed")
 
 
-def get_engine():
+def get_engine(env_var: str = "DATABASE_URL"):
     load_dotenv()
-    URL = os.getenv("DATABASE_URL")
+    URL = os.getenv(env_var)
+
     if not URL:
-        raise FileNotFoundError(
-            "DATABASE_URL is not found in the environment variables. please check your .env file."
+        raise ValueError(
+            f"{env_var}is not found in the environment variables. please check your .env file."
         )
     engine = create_engine(URL)
     return engine
