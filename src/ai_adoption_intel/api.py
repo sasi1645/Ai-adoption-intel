@@ -1,7 +1,9 @@
 import pandas as pd
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from sqlalchemy import text
 
+from ai_adoption_intel.llm import ask
 from ai_adoption_intel.load import get_engine
 
 app = FastAPI()
@@ -51,3 +53,17 @@ def sector_ranking(limit: int = 5):
     df = pd.read_sql_query(query, con=engine, params={"limit": limit})
     records = df.to_dict(orient="records")
     return records
+
+
+class AskRequest(BaseModel):
+    question: str
+
+
+@app.post("/ask")
+def ask_question(request: AskRequest):
+    question = request.question
+    try:
+        ask(question)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return ask(question)
