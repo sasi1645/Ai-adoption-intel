@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-
+import ai_adoption_intel.api
 from ai_adoption_intel.api import app
 
 client = TestClient(app)
@@ -83,3 +83,40 @@ def test_ranking_default():
         "name": "Multi-sector or multi-state companies",
         "percentage": 33.7,
     }
+
+
+def test_ask_success(monkeypatch):
+    fake_result = {
+        "question": "q",
+        "sql": "SELECT question From national;",
+        "rows": [],
+        "answer": "is using ai is good.",
+    }
+
+    def func(question):
+        return fake_result
+
+    monkeypatch.setattr(ai_adoption_intel.api, "ask", func)
+    response = client.post("/ask", json={"question": "How much do banks use AI?"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data == fake_result
+
+
+def test_ask_unsafe_sql(monkeypatch):
+    def func(question):
+        raise ValueError("not safe")
+
+    monkeypatch.setattr(ai_adoption_intel.api, "ask", func)
+    response = client.post(
+        "/ask",
+        json={"question": "How has AI use changed in the space-travel industry?"},
+    )
+    assert response.status_code == 400
+    data = response.json()
+    assert data["detail"] == "not safe"
+
+
+def test_ask_missing_question():
+    response = client.post("/ask", json={})
+    assert response.status_code == 422
